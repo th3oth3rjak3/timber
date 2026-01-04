@@ -10,7 +10,7 @@
 ✔ Add the player to the game. @done(26-01-03 19:57)
 ✔ Add the axe to the game. @done(26-01-03 19:57)
 ✔ Experiment with keypresses and sounds @done(26-01-03 19:59)
-☐ Add score handling.
+✔ Add score handling. @done(26-01-03 20:34)
 ☐ Add the log to the game.
 ☐ Add branches to the game.
 ☐ Add game start, pause, out of time text

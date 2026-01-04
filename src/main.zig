@@ -1,13 +1,16 @@
 const std = @import("std");
 const rl = @import("raylib");
-const GameAssets = @import("assets.zig").GameAssets;
 const util = @import("utils.zig");
-const Cloud = @import("cloud.zig").Cloud;
-const Bee = @import("bee.zig").Bee;
-const Tree = @import("tree.zig").Tree;
-const BackgroundTree = @import("tree.zig").BackgroundTree;
-const Player = @import("player.zig").Player;
+
 const Axe = @import("axe.zig").Axe;
+const Background = @import("background.zig").Background;
+const BackgroundTree = @import("tree.zig").BackgroundTree;
+const Bee = @import("bee.zig").Bee;
+const Cloud = @import("cloud.zig").Cloud;
+const GameAssets = @import("assets.zig").GameAssets;
+const Player = @import("player.zig").Player;
+const Score = @import("score.zig").Score;
+const Tree = @import("tree.zig").Tree;
 
 const SCREEN_WIDTH = 1920;
 const SCREEN_HEIGHT = 1080;
@@ -31,17 +34,17 @@ pub fn main() anyerror!void {
         c.* = Cloud.init(assets.cloud, rand);
     }
 
-    var tree = Tree.init(assets.tree);
-
     var backgroundTrees: [3]BackgroundTree = undefined;
     backgroundTrees[0] = BackgroundTree.init(assets.treeAlt, 20, 0);
     backgroundTrees[1] = BackgroundTree.init(assets.treeAlt, 1500, -40);
     backgroundTrees[2] = BackgroundTree.init(assets.treeAlt, 1900, 0);
 
+    var background = Background.init(assets.background);
+    var tree = Tree.init(assets.tree);
     var player = Player.init(assets.player);
     var axe = Axe.init(assets.axe);
-
     var bee = Bee.init(assets.bee, rand);
+    var score = Score.init(&assets.font);
 
     // Game Loop
     while (!rl.windowShouldClose()) {
@@ -57,12 +60,14 @@ pub fn main() anyerror!void {
 
         if (rl.isKeyPressed(rl.KeyboardKey.left)) {
             rl.playSound(assets.chop);
+            score.increment();
             player.update(.left);
             axe.update(.left);
         }
 
         if (rl.isKeyPressed(rl.KeyboardKey.right)) {
             rl.playSound(assets.chop);
+            score.increment();
             player.update(.right);
             axe.update(.right);
         }
@@ -81,7 +86,8 @@ pub fn main() anyerror!void {
 
         rl.clearBackground(.white);
 
-        rl.drawTexture(assets.background, 0, 0, rl.Color.white);
+        background.draw();
+
         for (&clouds) |*cloud| {
             cloud.draw();
         }
@@ -94,5 +100,6 @@ pub fn main() anyerror!void {
         player.draw();
         axe.draw();
         bee.draw();
+        score.draw();
     }
 }
