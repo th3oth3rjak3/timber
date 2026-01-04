@@ -4,6 +4,7 @@ const GameAssets = @import("assets.zig").GameAssets;
 const util = @import("utils.zig");
 const Cloud = @import("cloud.zig").Cloud;
 const Bee = @import("bee.zig").Bee;
+const Tree = @import("tree.zig").Tree;
 
 const SCREEN_WIDTH = 1920;
 const SCREEN_HEIGHT = 1080;
@@ -26,6 +27,8 @@ pub fn main() anyerror!void {
     for (&clouds) |*c| {
         c.* = Cloud.init(assets.cloud, rand);
     }
+
+    var tree = Tree.init(assets.tree);
 
     var bee = Bee.init(assets.bee, rand);
 
@@ -51,6 +54,8 @@ pub fn main() anyerror!void {
         for (&clouds) |*cloud| {
             cloud.draw();
         }
+
+        tree.draw();
 
         bee.draw();
     }
