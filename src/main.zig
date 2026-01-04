@@ -6,6 +6,8 @@ const Cloud = @import("cloud.zig").Cloud;
 const Bee = @import("bee.zig").Bee;
 const Tree = @import("tree.zig").Tree;
 const BackgroundTree = @import("tree.zig").BackgroundTree;
+const Player = @import("player.zig").Player;
+const Axe = @import("axe.zig").Axe;
 
 const SCREEN_WIDTH = 1920;
 const SCREEN_HEIGHT = 1080;
@@ -36,6 +38,9 @@ pub fn main() anyerror!void {
     backgroundTrees[1] = BackgroundTree.init(assets.treeAlt, 1500, -40);
     backgroundTrees[2] = BackgroundTree.init(assets.treeAlt, 1900, 0);
 
+    var player = Player.init(assets.player);
+    var axe = Axe.init(assets.axe);
+
     var bee = Bee.init(assets.bee, rand);
 
     // Game Loop
@@ -49,6 +54,26 @@ pub fn main() anyerror!void {
         }
 
         bee.update(rand, dt);
+
+        if (rl.isKeyPressed(rl.KeyboardKey.left)) {
+            rl.playSound(assets.chop);
+            player.update(.left);
+            axe.update(.left);
+        }
+
+        if (rl.isKeyPressed(rl.KeyboardKey.right)) {
+            rl.playSound(assets.chop);
+            player.update(.right);
+            axe.update(.right);
+        }
+
+        if (rl.isKeyReleased(rl.KeyboardKey.right)) {
+            axe.update(.none);
+        }
+
+        if (rl.isKeyReleased(rl.KeyboardKey.left)) {
+            axe.update(.none);
+        }
 
         // Render
         rl.beginDrawing();
@@ -66,7 +91,8 @@ pub fn main() anyerror!void {
         }
 
         tree.draw();
-
+        player.draw();
+        axe.draw();
         bee.draw();
     }
 }

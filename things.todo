@@ -7,9 +7,10 @@
 ✔ Add the bee to the game with movement. @done(26-01-03 18:40)
 ✔ Add the primary tree to the game. @done(26-01-03 18:50)
 ✔ Add the background trees to the game. @done(26-01-03 18:57)
+✔ Add the player to the game. @done(26-01-03 19:57)
+✔ Add the axe to the game. @done(26-01-03 19:57)
+✔ Experiment with keypresses and sounds @done(26-01-03 19:59)
+☐ Add score handling.
 ☐ Add the log to the game.
-☐ Add the player to the game.
-☐ Add the axe to the game.
-☐ Experiment with keypresses and sounds
-☐ Add score handling after keypresses are figured out.
 ☐ Add branches to the game.
+☐ Add game start, pause, out of time text
