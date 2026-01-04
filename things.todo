@@ -1,0 +1,8 @@
+✔ Decide on a game library (probably raylib-zig) @done(26-01-03 16:41)
+☐ Add raylib to the build.zig file
+☐ Create a basic game loop
+☐ Copy assets into this project
+☐ Render the background image
+☐ Experiment with keypresses and sounds
+☐ Add the clouds with movement to the game
+☐ Add the bee to the game with movement.
