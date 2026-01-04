@@ -1,33 +1,33 @@
 const std = @import("std");
 const rl = @import("raylib");
-const assets = @import("assets.zig");
+const GameAssets = @import("assets.zig").GameAssets;
 const util = @import("utils.zig");
-const cloud_import = @import("cloud.zig");
-const bee_import = @import("bee.zig");
+const Cloud = @import("cloud.zig").Cloud;
+const Bee = @import("bee.zig").Bee;
 
-const screenWidth = 1920;
-const screenHeight = 1080;
+const SCREEN_WIDTH = 1920;
+const SCREEN_HEIGHT = 1080;
 
 pub fn main() anyerror!void {
     var prng = std.Random.DefaultPrng.init(@bitCast(std.time.timestamp()));
     const rand = prng.random();
 
-    rl.initWindow(screenWidth, screenHeight, "Timber!!");
+    rl.initWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Timber!!");
     defer rl.closeWindow();
     rl.setTargetFPS(120);
 
     rl.initAudioDevice();
     defer rl.closeAudioDevice();
 
-    const gameAssets = try assets.GameAssets.load();
-    defer gameAssets.unload();
+    const assets = try GameAssets.load();
+    defer assets.unload();
 
-    var clouds: [3]cloud_import.Cloud = undefined;
+    var clouds: [3]Cloud = undefined;
     for (&clouds) |*c| {
-        c.* = cloud_import.Cloud.init(gameAssets.cloud, rand);
+        c.* = Cloud.init(assets.cloud, rand);
     }
 
-    var bee = bee_import.Bee.init(gameAssets.bee, rand);
+    var bee = Bee.init(assets.bee, rand);
 
     // Game Loop
     while (!rl.windowShouldClose()) {
@@ -35,8 +35,8 @@ pub fn main() anyerror!void {
         const dt = rl.getFrameTime();
 
         // Update State
-        for (&clouds) |*c| {
-            c.update(rand, dt);
+        for (&clouds) |*cloud| {
+            cloud.update(rand, dt);
         }
 
         bee.update(rand, dt);
@@ -47,9 +47,9 @@ pub fn main() anyerror!void {
 
         rl.clearBackground(.white);
 
-        rl.drawTexture(gameAssets.background, 0, 0, rl.Color.white);
-        for (&clouds) |*c| {
-            c.draw();
+        rl.drawTexture(assets.background, 0, 0, rl.Color.white);
+        for (&clouds) |*cloud| {
+            cloud.draw();
         }
 
         bee.draw();
