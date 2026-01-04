@@ -11,6 +11,8 @@
 ✔ Add the axe to the game. @done(26-01-03 19:57)
 ✔ Experiment with keypresses and sounds @done(26-01-03 19:59)
 ✔ Add score handling. @done(26-01-03 20:34)
-☐ Add the log to the game.
+✔ Add the log to the game. @done(26-01-03 23:03)
 ☐ Add branches to the game.
 ☐ Add game start, pause, out of time text
+☐ Add game timer
+☐ Add high score feature?

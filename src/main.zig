@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const rl = @import("raylib");
 const util = @import("utils.zig");
 
@@ -8,6 +9,7 @@ const BackgroundTree = @import("tree.zig").BackgroundTree;
 const Bee = @import("bee.zig").Bee;
 const Cloud = @import("cloud.zig").Cloud;
 const GameAssets = @import("assets.zig").GameAssets;
+const Log = @import("log.zig").Log;
 const Player = @import("player.zig").Player;
 const Score = @import("score.zig").Score;
 const Tree = @import("tree.zig").Tree;
@@ -15,7 +17,26 @@ const Tree = @import("tree.zig").Tree;
 const SCREEN_WIDTH = 1920;
 const SCREEN_HEIGHT = 1080;
 
+const is_debug = builtin.mode == .Debug or builtin.mode == .ReleaseSafe;
+// This will get lazily evaluated and removed when not in debug mode
+// https://ziggit.dev/t/allocator-swapping-and-type-consistency/10217/7
+var dba: std.heap.DebugAllocator(.{}) =
+    if (is_debug)
+        .init
+    else
+        @compileError("Should not use debug allocator in release mode");
+
 pub fn main() anyerror!void {
+    defer if (is_debug) {
+        const result = dba.deinit();
+        if (result == .leak) {
+            std.debug.print("MEMORY LEAK DETECTED!!!!\n", .{});
+        }
+    };
+
+    const allocator =
+        if (builtin.os.tag == .wasi) std.heap.wasm_allocator else if (is_debug) dba.allocator() else std.heap.smp_allocator;
+
     var prng = std.Random.DefaultPrng.init(@bitCast(std.time.timestamp()));
     const rand = prng.random();
 
@@ -46,6 +67,10 @@ pub fn main() anyerror!void {
     var bee = Bee.init(&assets.bee, rand);
     var score = Score.init(&assets.font);
 
+    // Log storage
+    var flyingLogs = std.ArrayList(Log).empty;
+    defer flyingLogs.deinit(allocator);
+
     // Game Loop
     while (!rl.windowShouldClose()) {
         // deltaTime
@@ -63,6 +88,8 @@ pub fn main() anyerror!void {
             score.increment();
             player.update(.left);
             axe.update(.left);
+            const newLog = try flyingLogs.addOne(allocator);
+            newLog.* = Log.init(&assets.log, .left);
         }
 
         if (rl.isKeyPressed(rl.KeyboardKey.right)) {
@@ -70,6 +97,8 @@ pub fn main() anyerror!void {
             score.increment();
             player.update(.right);
             axe.update(.right);
+            const newLog = try flyingLogs.addOne(allocator);
+            newLog.* = Log.init(&assets.log, .right);
         }
 
         if (rl.isKeyReleased(rl.KeyboardKey.right)) {
@@ -78,6 +107,15 @@ pub fn main() anyerror!void {
 
         if (rl.isKeyReleased(rl.KeyboardKey.left)) {
             axe.update(.none);
+        }
+
+        // Despawn offscreened logs
+        for (flyingLogs.items, 0..) |*log, i| {
+            if (!log.isActive) {
+                _ = flyingLogs.swapRemove(i);
+            }
+
+            log.update(dt);
         }
 
         // Render
@@ -94,6 +132,10 @@ pub fn main() anyerror!void {
 
         for (&backgroundTrees) |*backgroundTree| {
             backgroundTree.draw();
+        }
+
+        for (flyingLogs.items) |*log| {
+            log.draw();
         }
 
         tree.draw();
