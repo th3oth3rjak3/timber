@@ -9,12 +9,12 @@ pub const Player = struct {
     const X_LEFT_POSITION: i32 = 580;
     const X_RIGHT_POSITION: i32 = 1200;
 
-    texture: rl.Texture,
+    texture: *const rl.Texture,
     side: Side,
     x: i32,
     y: i32,
 
-    pub fn init(texture: rl.Texture) Self {
+    pub fn init(texture: *const rl.Texture) Self {
         return Self{
             .texture = texture,
             .side = .right,
@@ -41,8 +41,8 @@ pub const Player = struct {
         var src = rl.Rectangle{
             .x = 0,
             .y = 0,
-            .width = @as(f32, @floatFromInt(self.texture.width)),
-            .height = @as(f32, @floatFromInt(self.texture.height)),
+            .width = @as(f32, @floatFromInt(self.texture.*.width)),
+            .height = @as(f32, @floatFromInt(self.texture.*.height)),
         };
 
         const pos = rl.Vector2{
@@ -54,6 +54,6 @@ pub const Player = struct {
             src.width = -src.width;
         }
 
-        rl.drawTextureRec(self.texture, src, pos, rl.Color.white);
+        rl.drawTextureRec(self.texture.*, src, pos, rl.Color.white);
     }
 };

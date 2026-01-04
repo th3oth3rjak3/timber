@@ -11,12 +11,12 @@ pub const Cloud = struct {
     const MIN_Y: f32 = 50;
     const MAX_Y: f32 = 200;
 
-    texture: rl.Texture,
+    texture: *const rl.Texture,
     x: f32,
     y: f32,
     speed: f32,
 
-    pub fn init(texture: rl.Texture, rand: std.Random) Self {
+    pub fn init(texture: *const rl.Texture, rand: std.Random) Self {
         return Self{
             .texture = texture,
             .x = util.randomRange(f32, rand, 0, 1920),
@@ -29,12 +29,12 @@ pub const Cloud = struct {
     pub fn update(self: *Self, rand: std.Random, deltaTime: f32) void {
         self.x += self.speed * deltaTime;
         if (self.x > 1920) {
-            self.x = -@as(f32, @floatFromInt(self.texture.width));
+            self.x = -@as(f32, @floatFromInt(self.texture.*.width));
             self.y = util.randomRange(f32, rand, 50, 200);
         }
     }
 
     pub fn draw(self: *Self) void {
-        rl.drawTexture(self.texture, @intFromFloat(self.x), @intFromFloat(self.y), rl.Color.white);
+        rl.drawTexture(self.texture.*, @intFromFloat(self.x), @intFromFloat(self.y), rl.Color.white);
     }
 };

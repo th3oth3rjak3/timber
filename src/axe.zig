@@ -10,11 +10,11 @@ pub const Axe = struct {
     const Y_POSITION: i32 = 830;
 
     side: Side,
-    texture: rl.Texture,
+    texture: *const rl.Texture,
     x: i32,
     y: i32,
 
-    pub fn init(texture: rl.Texture) Self {
+    pub fn init(texture: *const rl.Texture) Self {
         return Self{
             .side = .none,
             .texture = texture,
@@ -44,8 +44,8 @@ pub const Axe = struct {
         var src = rl.Rectangle{
             .x = 0,
             .y = 0,
-            .width = @as(f32, @floatFromInt(self.texture.width)),
-            .height = @as(f32, @floatFromInt(self.texture.height)),
+            .width = @as(f32, @floatFromInt(self.texture.*.width)),
+            .height = @as(f32, @floatFromInt(self.texture.*.height)),
         };
 
         const pos = rl.Vector2{
@@ -57,6 +57,6 @@ pub const Axe = struct {
             src.width = -src.width;
         }
 
-        rl.drawTextureRec(self.texture, src, pos, rl.Color.white);
+        rl.drawTextureRec(self.texture.*, src, pos, rl.Color.white);
     }
 };

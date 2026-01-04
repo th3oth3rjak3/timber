@@ -31,19 +31,19 @@ pub fn main() anyerror!void {
 
     var clouds: [3]Cloud = undefined;
     for (&clouds) |*c| {
-        c.* = Cloud.init(assets.cloud, rand);
+        c.* = Cloud.init(&assets.cloud, rand);
     }
 
     var backgroundTrees: [3]BackgroundTree = undefined;
-    backgroundTrees[0] = BackgroundTree.init(assets.treeAlt, 20, 0);
-    backgroundTrees[1] = BackgroundTree.init(assets.treeAlt, 1500, -40);
-    backgroundTrees[2] = BackgroundTree.init(assets.treeAlt, 1900, 0);
+    backgroundTrees[0] = BackgroundTree.init(&assets.treeAlt, 20, 0);
+    backgroundTrees[1] = BackgroundTree.init(&assets.treeAlt, 1500, -40);
+    backgroundTrees[2] = BackgroundTree.init(&assets.treeAlt, 1900, 0);
 
-    var background = Background.init(assets.background);
-    var tree = Tree.init(assets.tree);
-    var player = Player.init(assets.player);
-    var axe = Axe.init(assets.axe);
-    var bee = Bee.init(assets.bee, rand);
+    var background = Background.init(&assets.background);
+    var tree = Tree.init(&assets.tree);
+    var player = Player.init(&assets.player);
+    var axe = Axe.init(&assets.axe);
+    var bee = Bee.init(&assets.bee, rand);
     var score = Score.init(&assets.font);
 
     // Game Loop
