@@ -13,6 +13,7 @@
 ✔ Add score handling. @done(26-01-03 20:34)
 ✔ Add the log to the game. @done(26-01-03 23:03)
 ✔ Add branches to the game. @done(26-01-04 13:54)
+✔ Add game timer @done(26-01-04 15:22)
+☐ Add ability to start again by pressing enter.
 ☐ Add game start, pause, out of time text
-☐ Add game timer
 ☐ Add high score feature?

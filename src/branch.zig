@@ -1,5 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
+const util = @import("utils.zig");
+
 const Side = @import("shared.zig").Side;
 
 pub const Branch = struct {
@@ -54,3 +56,27 @@ pub const Branch = struct {
         rl.drawTexturePro(self.texture.*, source, dest, ORIGIN, 0, rl.Color.white);
     }
 };
+
+pub fn updateBranches(branches: *[6]Branch, rand: std.Random) void {
+    var lastBranch = branches[5];
+
+    for (0..branches.len - 1) |i| {
+        const index = branches.len - 1 - i;
+        branches[index] = branches[index - 1];
+    }
+
+    const randInt = util.randomRange(u8, rand, 0, 6);
+    switch (randInt) {
+        0 => {
+            lastBranch.reset(.left);
+        },
+        1 => {
+            lastBranch.reset(.right);
+        },
+        else => {
+            lastBranch.reset(.none);
+        },
+    }
+
+    branches[0] = lastBranch;
+}

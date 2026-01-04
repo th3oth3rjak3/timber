@@ -1,5 +1,6 @@
 const std = @import("std");
 const builtin = @import("builtin");
+const b = @import("branch.zig");
 const rl = @import("raylib");
 const util = @import("utils.zig");
 
@@ -13,6 +14,7 @@ const GameAssets = @import("assets.zig").GameAssets;
 const Log = @import("log.zig").Log;
 const Player = @import("player.zig").Player;
 const Score = @import("score.zig").Score;
+const Timer = @import("timer.zig").Timer;
 const Tree = @import("tree.zig").Tree;
 
 const SCREEN_WIDTH = 1920;
@@ -26,30 +28,6 @@ var dba: std.heap.DebugAllocator(.{}) =
         .init
     else
         @compileError("Should not use debug allocator in release mode");
-
-fn updateBranches(branches: *[6]Branch, rand: std.Random) void {
-    var lastBranch = branches[5];
-
-    for (0..branches.len - 1) |i| {
-        const index = branches.len - 1 - i;
-        branches[index] = branches[index - 1];
-    }
-
-    const randInt = util.randomRange(u8, rand, 0, 6);
-    switch (randInt) {
-        0 => {
-            lastBranch.reset(.left);
-        },
-        1 => {
-            lastBranch.reset(.right);
-        },
-        else => {
-            lastBranch.reset(.none);
-        },
-    }
-
-    branches[0] = lastBranch;
-}
 
 pub fn main() anyerror!void {
     defer if (is_debug) {
@@ -96,6 +74,7 @@ pub fn main() anyerror!void {
     var axe = Axe.init(&assets.axe);
     var bee = Bee.init(&assets.bee, rand);
     var score = Score.init(&assets.font);
+    var timer = Timer.init();
 
     // Log storage
     var flyingLogs = std.ArrayList(Log).empty;
@@ -117,6 +96,8 @@ pub fn main() anyerror!void {
         bee.update(rand, dt);
 
         if (gameActive) {
+            timer.update(dt);
+
             if (rl.isKeyPressed(rl.KeyboardKey.left)) {
                 rl.playSound(assets.chop);
                 score.increment();
@@ -124,7 +105,8 @@ pub fn main() anyerror!void {
                 axe.update(.left);
                 const newLog = try flyingLogs.addOne(allocator);
                 newLog.* = Log.init(&assets.log, .left);
-                updateBranches(&branches, rand);
+                b.updateBranches(&branches, rand);
+                timer.addBonusTime(0.25);
             }
 
             if (rl.isKeyPressed(rl.KeyboardKey.right)) {
@@ -134,7 +116,8 @@ pub fn main() anyerror!void {
                 axe.update(.right);
                 const newLog = try flyingLogs.addOne(allocator);
                 newLog.* = Log.init(&assets.log, .right);
-                updateBranches(&branches, rand);
+                b.updateBranches(&branches, rand);
+                timer.addBonusTime(0.25);
             }
 
             if (rl.isKeyReleased(rl.KeyboardKey.right)) {
@@ -149,6 +132,12 @@ pub fn main() anyerror!void {
             if (branches[5].side == player.side) {
                 gameActive = false;
                 rl.playSound(assets.death);
+            }
+
+            // Check for out of time condition.
+            if (timer.timeRemaining == 0) {
+                gameActive = false;
+                rl.playSound(assets.outOfTime);
             }
         }
 
@@ -190,5 +179,6 @@ pub fn main() anyerror!void {
         axe.draw();
         bee.draw();
         score.draw();
+        timer.draw();
     }
 }
