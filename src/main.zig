@@ -43,6 +43,7 @@ pub fn main() anyerror!void {
         if (builtin.os.tag == .wasi) std.heap.wasm_allocator else if (is_debug) dba.allocator() else std.heap.smp_allocator;
 
     var highScore = try HighScore.load(allocator);
+    var previousHighScore = highScore.best;
 
     var prng = std.Random.DefaultPrng.init(@bitCast(std.time.timestamp()));
     const rand = prng.random();
@@ -159,7 +160,10 @@ pub fn main() anyerror!void {
             if (branches[5].side == player.side) {
                 gameActive = false;
                 rl.playSound(assets.death);
-                try highScore.save();
+                if (highScore.best > previousHighScore) {
+                    try highScore.save(allocator);
+                    previousHighScore = highScore.best;
+                }
                 message.show("Squished! Press Enter to start over.");
             }
 
@@ -167,7 +171,10 @@ pub fn main() anyerror!void {
             if (timer.timeRemaining == 0) {
                 gameActive = false;
                 rl.playSound(assets.outOfTime);
-                try highScore.save();
+                if (highScore.best > previousHighScore) {
+                    try highScore.save(allocator);
+                    previousHighScore = highScore.best;
+                }
                 message.show("Out of time! Press Enter to start over.");
             }
         }

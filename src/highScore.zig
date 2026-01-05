@@ -9,8 +9,18 @@ pub const HighScore = struct {
 
     best: u16,
 
+    fn getConfigPath(allocator: std.mem.Allocator) ![]const u8 {
+        const app_data_dir = try std.fs.getAppDataDir(allocator, "timber");
+        defer allocator.free(app_data_dir);
+
+        return std.fs.path.join(allocator, &[_][]const u8{ app_data_dir, "highscore.zon" });
+    }
+
     pub fn load(allocator: std.mem.Allocator) !Self {
-        const file = std.fs.cwd().openFile("highscore.zon", .{}) catch {
+        const config_path = try getConfigPath(allocator);
+        defer allocator.free(config_path);
+
+        const file = std.fs.cwd().openFile(config_path, .{}) catch {
             std.debug.print("No file exists, continuing\n", .{});
             return Self{ .best = 0 };
         };
@@ -29,13 +39,24 @@ pub const HighScore = struct {
         return try std.zon.parse.fromSlice(Self, allocator, null_terminated, null, .{});
     }
 
-    pub fn save(self: *Self) !void {
-        const file = try std.fs.cwd().createFile("highscore.zon", .{});
+    pub fn save(self: *Self, allocator: std.mem.Allocator) !void {
+        const app_data_dir = try std.fs.getAppDataDir(allocator, "timber");
+        defer allocator.free(app_data_dir);
+
+        std.fs.cwd().makePath(app_data_dir) catch |err| switch (err) {
+            error.PathAlreadyExists => {},
+            else => return err,
+        };
+
+        const config_path = try getConfigPath(allocator);
+        defer allocator.free(config_path);
+
+        const file = try std.fs.cwd().createFile(config_path, .{});
         defer file.close();
 
         var writebuf: [1024]u8 = undefined;
         var fileWriter = file.writer(&writebuf);
-        const writer = &fileWriter.interface;
+        var writer = &fileWriter.interface;
 
         try std.zon.stringify.serialize(self, .{}, writer);
         try writer.flush();
