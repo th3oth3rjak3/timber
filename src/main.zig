@@ -11,6 +11,7 @@ const Bee = @import("bee.zig").Bee;
 const Branch = @import("branch.zig").Branch;
 const Cloud = @import("cloud.zig").Cloud;
 const GameAssets = @import("assets.zig").GameAssets;
+const HighScore = @import("highScore.zig").HighScore;
 const Log = @import("log.zig").Log;
 const Message = @import("message.zig").Message;
 const Player = @import("player.zig").Player;
@@ -40,6 +41,8 @@ pub fn main() anyerror!void {
 
     const allocator =
         if (builtin.os.tag == .wasi) std.heap.wasm_allocator else if (is_debug) dba.allocator() else std.heap.smp_allocator;
+
+    var highScore = try HighScore.load(allocator);
 
     var prng = std.Random.DefaultPrng.init(@bitCast(std.time.timestamp()));
     const rand = prng.random();
@@ -119,6 +122,9 @@ pub fn main() anyerror!void {
             if (rl.isKeyPressed(rl.KeyboardKey.left)) {
                 rl.playSound(assets.chop);
                 score.increment();
+                if (score.score > highScore.best) {
+                    highScore.update(score.score);
+                }
                 player.update(.left);
                 axe.update(.left);
                 const newLog = try flyingLogs.addOne(allocator);
@@ -130,6 +136,9 @@ pub fn main() anyerror!void {
             if (rl.isKeyPressed(rl.KeyboardKey.right)) {
                 rl.playSound(assets.chop);
                 score.increment();
+                if (score.score > highScore.best) {
+                    highScore.update(score.score);
+                }
                 player.update(.right);
                 axe.update(.right);
                 const newLog = try flyingLogs.addOne(allocator);
@@ -150,6 +159,7 @@ pub fn main() anyerror!void {
             if (branches[5].side == player.side) {
                 gameActive = false;
                 rl.playSound(assets.death);
+                try highScore.save();
                 message.show("Squished! Press Enter to start over.");
             }
 
@@ -157,6 +167,7 @@ pub fn main() anyerror!void {
             if (timer.timeRemaining == 0) {
                 gameActive = false;
                 rl.playSound(assets.outOfTime);
+                try highScore.save();
                 message.show("Out of time! Press Enter to start over.");
             }
         }
@@ -199,6 +210,7 @@ pub fn main() anyerror!void {
         axe.draw();
         bee.draw();
         score.draw();
+        highScore.draw(&assets.font);
         timer.draw();
         message.draw();
     }
