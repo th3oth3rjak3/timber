@@ -11,6 +11,7 @@ const Bee = @import("bee.zig").Bee;
 const Branch = @import("branch.zig").Branch;
 const Cloud = @import("cloud.zig").Cloud;
 const GameAssets = @import("assets.zig").GameAssets;
+const Headstone = @import("headstone.zig").Headstone;
 const HighScore = @import("highScore.zig").HighScore;
 const Log = @import("log.zig").Log;
 const Message = @import("message.zig").Message;
@@ -80,6 +81,7 @@ pub fn main() anyerror!void {
     var bee = Bee.init(&assets.bee, rand);
     var score = Score.init(&assets.font);
     var timer = Timer.init();
+    var headstone = Headstone.init(&assets.headstone);
     var message = Message.init(&assets.font);
     message.show("Press Enter to start!");
 
@@ -107,6 +109,7 @@ pub fn main() anyerror!void {
                 score.reset();
                 player.reset();
                 axe.reset();
+                headstone.hide();
                 timer.reset();
                 for (&branches) |*branch| {
                     branch.reset(.none);
@@ -159,6 +162,9 @@ pub fn main() anyerror!void {
             // Check for player death
             if (branches[5].side == player.side) {
                 gameActive = false;
+                headstone.show(@floatFromInt(player.x), @floatFromInt(player.y));
+                axe.update(.none);
+                player.hide();
                 rl.playSound(assets.death);
                 if (highScore.best > previousHighScore) {
                     try highScore.save(allocator);
@@ -214,6 +220,7 @@ pub fn main() anyerror!void {
 
         tree.draw();
         player.draw();
+        headstone.draw();
         axe.draw();
         bee.draw();
         score.draw();

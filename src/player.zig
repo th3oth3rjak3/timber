@@ -9,6 +9,7 @@ pub const Player = struct {
     const X_LEFT_POSITION: i32 = 580;
     const X_RIGHT_POSITION: i32 = 1200;
 
+    isActive: bool,
     texture: *const rl.Texture,
     side: Side,
     x: i32,
@@ -16,6 +17,7 @@ pub const Player = struct {
 
     pub fn init(texture: *const rl.Texture) Self {
         return Self{
+            .isActive = true,
             .texture = texture,
             .side = .right,
             .x = X_RIGHT_POSITION,
@@ -24,6 +26,7 @@ pub const Player = struct {
     }
 
     pub fn reset(self: *Self) void {
+        self.show();
         self.update(.right);
     }
 
@@ -41,7 +44,19 @@ pub const Player = struct {
         }
     }
 
+    pub fn hide(self: *Self) void {
+        self.isActive = false;
+    }
+
+    pub fn show(self: *Self) void {
+        self.isActive = true;
+    }
+
     pub fn draw(self: *Self) void {
+        if (!self.isActive) {
+            return;
+        }
+
         var src = rl.Rectangle{
             .x = 0,
             .y = 0,
